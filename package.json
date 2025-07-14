@@ -12,19 +12,19 @@
     "lint": "eslint src",
     "format": "prettier --write src",
     "types": "tsc --noEmit true",
-    "prepare": "yarn build && husky install",
-    "example": "yarn --cwd example",
+    "prepare": "npm run build && husky install",
+    "example": "npm run --cwd example",
     "pods": "cd example/ios && pod install",
-    "bootstrap": "yarn example && yarn && yarn pods",
-    "prepublishOnly": "yarn lint",
-    "preversion": "yarn lint",
-    "version": "yarn format && git add -A src && yarn changelog && git add CHANGELOG.md",
-    "postversion": "if [[ ${npm_package_version} != *'nightly'* ]]; then yarn publish:git && yarn publish:npm; fi",
+    "bootstrap": "npm run example && npm run && npm run pods",
+    "prepublishOnly": "npm run lint",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src && npm run changelog && git add CHANGELOG.md",
+    "postversion": "if [[ ${npm_package_version} != *'nightly'* ]]; then npm run publish:git && npm run publish:npm; fi",
     "ci:lint": "eslint src --max-warnings=0",
     "ci:format": "prettier --check src",
     "changelog": "conventional-changelog -p angular -s -i CHANGELOG.md -r 1",
     "publish:git": "git push && git push --tags",
-    "publish:npm": "yarn prepare && npm publish --access public"
+    "publish:npm": "npm run prepare && npm publish --access public"
   },
   "files": [
     "src",
@@ -75,12 +75,6 @@
   "bugs": {
     "url": "https://github.com/doublesymmetry/react-native-track-player/issues"
   },
-  "peerDependencies": {
-    "react": ">=16.8.6",
-    "react-native": ">=0.60.0-rc.2",
-    "react-native-windows": ">=0.63.0",
-    "shaka-player": "^4.7.9"
-  },
   "peerDependenciesMeta": {
     "react-native-windows": {
       "optional": true
@@ -112,7 +106,7 @@
   },
   "tea": {
     "dependencies": {
-      "classic.yarnpkg.com": "^1"
+      "classic.npm runpkg.com": "^1"
     }
   }
 }
