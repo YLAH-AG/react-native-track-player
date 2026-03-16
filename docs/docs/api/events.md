@@ -39,22 +39,6 @@ Fired when the queue reaches the end.
 | track    | `number` | The previous track index. Might be null      |
 | position | `number` | The previous track position in seconds    |
 
-### `PlaybackMetadataReceived`
-
-**⚠️ Deprecated:** Please use `AudioChapterMetadataReceived`, `AudioTimedMetadataReceived`, `AudioCommonMetadataReceived`.
-
-Fired when the current track receives metadata encoded in. (e.g. ID3 tags, Icy Metadata, Vorbis Comments or QuickTime metadata).
-
-| Param    | Type     | Description                                         |
-| -------- | -------- | --------------------------------------------------- |
-| source   | `string` | The metadata source (`id3`, `icy`, `icy-headers`, `vorbis-comment`, `quicktime`) |
-| title    | `string` | The track title. Might be null                      |
-| url      | `string` | The track url. Might be null                        |
-| artist   | `string` | The track artist. Might be null                     |
-| album    | `string` | The track album. Might be null                      |
-| date     | `string` | The track date. Might be null                       |
-| genre    | `string` | The track genre. Might be null                      |
-
 ### `PlaybackProgressUpdated`
 
 ⚠️ Note: This event is only emitted if you specify a non-zero `progressUpdateEventInterval` value in your player options.
@@ -83,18 +67,6 @@ Fired when the `playWhenReady` property is changed.
 | Param         | Type     | Description                           |
 | ------------- | -------- | ------------------------------------- |
 | playWhenReady | `boolean` | The current value of `playWhenReady` |
-
-### ⚠️`PlaybackTrackChanged`
-
-**⚠️ Deprecated:** Please use `PlaybackActiveTrackChanged`.
-
-Fired when a track is changed.
-
-| Param     | Type     | Description                             |
-| --------- | -------- | --------------------------------------- |
-| track     | `number` | The previous track index. Might be null |
-| position  | `number` | The previous track position in seconds  |
-| nextTrack | `number` | The next track index. Might be null     |
 
 ----
 
@@ -128,6 +100,9 @@ In the case where `query` is empty, feel free to select any track to play.
 
 ### `RemotePause`
 Fired when the user presses the pause button. Only fired if the [`Capability.Pause`](./constants/capability.md) is allowed or if there's a change in outputs (e.g.: headphone disconnected).
+
+### `RemotePlayPause` (Android Only)
+Fired on android when Android emits the [`KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE`](https://developer.android.com/reference/android/view/KeyEvent#KEYCODE_MEDIA_PLAY_PAUSE).
 
 ### `RemoteStop`
 Fired when the user presses the stop button. Only fired if the [`Capability.Stop`](./constants/capability.md) is allowed.

@@ -69,7 +69,7 @@ const track3 = {
     duration: 411
 };
 
-// You can then [add](https://rntp.dev/docs/api/functions/queue#addtracks-insertbeforeindex) the items to the queue
+// You can then [add](https://doublesymmetry.github.io/react-native-track-player/docs/api/functions/queue#addtracks-insertbeforeindex) the items to the queue
 await TrackPlayer.add([track1, track2, track3]);
 ```
 
@@ -79,8 +79,8 @@ await TrackPlayer.add([track1, track2, track3]);
 
 import TrackPlayer, { State } from 'react-native-track-player';
 
-const state = await TrackPlayer.getState();
-if (state === State.Playing) {
+const playback = await TrackPlayer.getPlaybackState();
+if (playback.state === State.Playing) {
     console.log('The player is playing');
 };
 
@@ -129,7 +129,7 @@ console.log(`First title: ${tracks[0].title}`);
 
 You can subscribe to [player events](../api/events.md#player), which describe the
 changing nature of the playback state. For example, subscribe to the
-`Event.PlaybackTrackChanged` event to be notified when the track has changed or
+`Event.PlaybackActiveTrackChanged` event to be notified when the track has changed or
 subscribe to the `Event.PlaybackState` event to be notified when the player
 buffers, plays, pauses and stops.
 
@@ -210,16 +210,5 @@ TrackPlayer.updateOptions({
         Capability.SkipToPrevious,
         Capability.Stop,
     ],
-
-    // Capabilities that will show up when the notification is in the compact form on Android
-    compactCapabilities: [Capability.Play, Capability.Pause],
-
-    // Icons for the notification on Android (if you don't like the default ones)
-    playIcon: require('./play-icon.png'),
-    pauseIcon: require('./pause-icon.png'),
-    stopIcon: require('./stop-icon.png'),
-    previousIcon: require('./previous-icon.png'),
-    nextIcon: require('./next-icon.png'),
-    icon: require('./notification-icon.png')
 });
 ```

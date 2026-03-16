@@ -1,6 +1,11 @@
 import TrackPlayer, { Event } from 'react-native-track-player';
 
 export async function PlaybackService() {
+  TrackPlayer.addEventListener(Event.RemotePlayPause, () => {
+    console.log('Event.RemotePlayPause');
+    TrackPlayer.pause();
+  });
+
   TrackPlayer.addEventListener(Event.RemotePause, () => {
     console.log('Event.RemotePause');
     TrackPlayer.pause();
@@ -60,10 +65,6 @@ export async function PlaybackService() {
     console.log('Event.PlaybackState', event);
   });
 
-  TrackPlayer.addEventListener(Event.PlaybackMetadataReceived, (event) => {
-    console.log('[Deprecated] Event.PlaybackMetadataReceived', event);
-  });
-
   TrackPlayer.addEventListener(Event.MetadataChapterReceived, (event) => {
     console.log('Event.MetadataChapterReceived', event);
   });
@@ -75,20 +76,4 @@ export async function PlaybackService() {
   TrackPlayer.addEventListener(Event.MetadataCommonReceived, (event) => {
     console.log('Event.MetadataCommonReceived', event);
   });
-
-  TrackPlayer.addEventListener(Event.PlaybackProgressUpdated, (event) => {
-    console.log('Event.PlaybackProgressUpdated', event);
-  });
-
-  TrackPlayer.addEventListener(
-    Event.PlaybackMetadataReceived,
-    async ({ title, artist }) => {
-      const activeTrack = await TrackPlayer.getActiveTrack();
-      TrackPlayer.updateNowPlayingMetadata({
-        artist: [title, artist].filter(Boolean).join(' - '),
-        title: activeTrack?.title,
-        artwork: activeTrack?.artwork,
-      });
-    }
-  );
 }

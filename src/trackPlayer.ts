@@ -1,12 +1,6 @@
-import {
-  AppRegistry,
-  DeviceEventEmitter,
-  NativeEventEmitter,
-  Platform,
-} from 'react-native';
+import { AppRegistry, NativeEventEmitter, Platform } from 'react-native';
 
-import TrackPlayer from './TrackPlayerModule';
-import { Event, RepeatMode, State } from './constants';
+import { Event, RepeatMode } from './constants';
 import type {
   AddTrack,
   EventPayloadByEvent,
@@ -19,12 +13,11 @@ import type {
   TrackMetadataBase,
   UpdateOptions,
 } from './interfaces';
+import TrackPlayer from './NativeTrackPlayer';
 import resolveAssetSource from './resolveAssetSource';
 
-const emitter =
-  Platform.OS !== 'android'
-    ? new NativeEventEmitter(TrackPlayer)
-    : DeviceEventEmitter;
+const isAndroid = Platform.OS === 'android';
+const emitter = new NativeEventEmitter(TrackPlayer);
 
 // MARK: - Helpers
 
@@ -32,14 +25,22 @@ function resolveImportedAssetOrPath(pathOrAsset: string | number | undefined) {
   return pathOrAsset === undefined
     ? undefined
     : typeof pathOrAsset === 'string'
-    ? pathOrAsset
-    : resolveImportedAsset(pathOrAsset);
+      ? pathOrAsset
+      : resolveImportedAsset(pathOrAsset);
 }
 
 function resolveImportedAsset(id?: number) {
   return id
-    ? (resolveAssetSource(id) as { uri: string } | null) ?? undefined
+    ? ((resolveAssetSource(id) as { uri: string } | null) ?? undefined)
     : undefined;
+}
+
+function resolveTrackAssets(track: AddTrack) {
+  return {
+    ...track,
+    url: resolveImportedAssetOrPath(track.url),
+    artwork: resolveImportedAssetOrPath(track.artwork),
+  };
 }
 
 // MARK: - General API
@@ -47,13 +48,8 @@ function resolveImportedAsset(id?: number) {
 /**
  * Initializes the player with the specified options.
  *
- * Note that on Android this method must only be called while the app is in the
- * foreground, otherwise it will throw an error with code
- * `'android_cannot_setup_player_in_background'`. In this case you can wait for
- * the app to be in the foreground and try again.
- *
  * @param options The options to initialize the player with.
- * @see https://rntp.dev/docs/api/functions/lifecycle
+ * @see https://doublesymmetry.github.io/react-native-track-player/docs/api/functions/lifecycle
  */
 export async function setupPlayer(options: PlayerOptions = {}): Promise<void> {
   return TrackPlayer.setupPlayer(options);
@@ -63,7 +59,7 @@ export async function setupPlayer(options: PlayerOptions = {}): Promise<void> {
  * Register the playback service. The service will run as long as the player runs.
  */
 export function registerPlaybackService(factory: () => ServiceHandler) {
-  if (Platform.OS === 'android') {
+  if (isAndroid) {
     // Registers the headless task
     AppRegistry.registerHeadlessTask('TrackPlayer', factory);
   } else if (Platform.OS === 'web') {
@@ -81,13 +77,6 @@ export function addEventListener<T extends Event>(
     : (event: EventPayloadByEvent[T]) => void
 ) {
   return emitter.addListener(event, listener);
-}
-
-/**
- * @deprecated This method should not be used, most methods reject when service is not bound.
- */
-export function isServiceRunning(): Promise<boolean> {
-  return TrackPlayer.isServiceRunning();
 }
 
 // MARK: - Queue API
@@ -118,16 +107,10 @@ export async function add(
   tracks: AddTrack | AddTrack[],
   insertBeforeIndex = -1
 ): Promise<number | void> {
-  const resolvedTracks = (Array.isArray(tracks) ? tracks : [tracks]).map(
-    (track) => ({
-      ...track,
-      url: resolveImportedAssetOrPath(track.url),
-      artwork: resolveImportedAssetOrPath(track.artwork),
-    })
-  );
-  return resolvedTracks.length < 1
+  const addTracks = Array.isArray(tracks) ? tracks : [tracks];
+  return addTracks.length < 1
     ? undefined
-    : TrackPlayer.add(resolvedTracks, insertBeforeIndex);
+    : TrackPlayer.add(addTracks.map(resolveTrackAssets), insertBeforeIndex);
 }
 
 /**
@@ -135,8 +118,8 @@ export async function add(
  *
  * @param track The track to load.
  */
-export async function load(track: Track): Promise<number | void> {
-  return TrackPlayer.load(track);
+export async function load(track: AddTrack): Promise<number | void> {
+  return TrackPlayer.load(resolveTrackAssets(track));
 }
 
 /**
@@ -217,28 +200,16 @@ export async function skipToPrevious(initialPosition = -1): Promise<void> {
  * Updates the configuration for the components.
  *
  * @param options The options to update.
- * @see https://rntp.dev/docs/api/functions/player#updateoptionsoptions
+ * @see https://doublesymmetry.github.io/react-native-track-player/docs/api/functions/player#updateoptionsoptions
  */
-export async function updateOptions({
-  alwaysPauseOnInterruption,
-  ...options
-}: UpdateOptions = {}): Promise<void> {
+export async function updateOptions(
+  options: UpdateOptions = {}
+): Promise<void> {
   return TrackPlayer.updateOptions({
     ...options,
     android: {
-      // Handle deprecated alwaysPauseOnInterruption option:
-      alwaysPauseOnInterruption:
-        options.android?.alwaysPauseOnInterruption ?? alwaysPauseOnInterruption,
       ...options.android,
     },
-    icon: resolveImportedAsset(options.icon),
-    playIcon: resolveImportedAsset(options.playIcon),
-    pauseIcon: resolveImportedAsset(options.pauseIcon),
-    stopIcon: resolveImportedAsset(options.stopIcon),
-    previousIcon: resolveImportedAsset(options.previousIcon),
-    nextIcon: resolveImportedAsset(options.nextIcon),
-    rewindIcon: resolveImportedAsset(options.rewindIcon),
-    forwardIcon: resolveImportedAsset(options.forwardIcon),
   });
 }
 
@@ -257,15 +228,6 @@ export async function updateMetadataForTrack(
     ...metadata,
     artwork: resolveImportedAssetOrPath(metadata.artwork),
   });
-}
-
-/**
- * @deprecated Nominated for removal in the next major version. If you object
- * to this, please describe your use-case in the following issue:
- * https://github.com/doublesymmetry/react-native-track-player/issues/1653
- */
-export function clearNowPlayingMetadata(): Promise<void> {
-  return TrackPlayer.clearNowPlayingMetadata();
 }
 
 /**
@@ -370,7 +332,7 @@ export async function setRate(rate: number): Promise<void> {
  * Sets the queue.
  *
  * @param tracks The tracks to set as the queue.
- * @see https://rntp.dev/docs/api/constants/repeat-mode
+ * @see https://doublesymmetry.github.io/react-native-track-player/docs/api/constants/repeat-mode
  */
 export async function setQueue(tracks: Track[]): Promise<void> {
   return TrackPlayer.setQueue(tracks);
@@ -380,7 +342,7 @@ export async function setQueue(tracks: Track[]): Promise<void> {
  * Sets the queue repeat mode.
  *
  * @param repeatMode The repeat mode to set.
- * @see https://rntp.dev/docs/api/constants/repeat-mode
+ * @see https://doublesymmetry.github.io/react-native-track-player/docs/api/constants/repeat-mode
  */
 export async function setRepeatMode(mode: RepeatMode): Promise<RepeatMode> {
   return TrackPlayer.setRepeatMode(mode);
@@ -411,14 +373,14 @@ export async function getRate(): Promise<number> {
  * index.
  */
 export async function getTrack(index: number): Promise<Track | undefined> {
-  return TrackPlayer.getTrack(index);
+  return TrackPlayer.getTrack(index) as unknown as Track;
 }
 
 /**
  * Gets the whole queue.
  */
 export async function getQueue(): Promise<Track[]> {
-  return TrackPlayer.getQueue();
+  return TrackPlayer.getQueue() as unknown as Track[];
 }
 
 /**
@@ -433,41 +395,7 @@ export async function getActiveTrackIndex(): Promise<number | undefined> {
  * Gets the active track or undefined if there is no current track.
  */
 export async function getActiveTrack(): Promise<Track | undefined> {
-  return (await TrackPlayer.getActiveTrack()) ?? undefined;
-}
-
-/**
- * Gets the index of the current track or null if there is no current track.
- *
- * @deprecated use `TrackPlayer.getActiveTrackIndex()` instead.
- */
-export async function getCurrentTrack(): Promise<number | null> {
-  return TrackPlayer.getActiveTrackIndex();
-}
-
-/**
- * Gets the duration of the current track in seconds.
- * @deprecated Use `TrackPlayer.getProgress().then((progress) => progress.duration)` instead.
- */
-export async function getDuration(): Promise<number> {
-  return TrackPlayer.getDuration();
-}
-
-/**
- * Gets the buffered position of the current track in seconds.
- *
- * @deprecated Use `TrackPlayer.getProgress().then((progress) => progress.buffered)` instead.
- */
-export async function getBufferedPosition(): Promise<number> {
-  return TrackPlayer.getBufferedPosition();
-}
-
-/**
- * Gets the playback position of the current track in seconds.
- * @deprecated Use `TrackPlayer.getProgress().then((progress) => progress.position)` instead.
- */
-export async function getPosition(): Promise<number> {
-  return TrackPlayer.getPosition();
+  return ((await TrackPlayer.getActiveTrack()) as Track) ?? undefined;
 }
 
 /**
@@ -476,29 +404,22 @@ export async function getPosition(): Promise<number> {
  * duration in seconds.
  */
 export async function getProgress(): Promise<Progress> {
-  return TrackPlayer.getProgress();
-}
-
-/**
- * @deprecated use (await getPlaybackState()).state instead.
- */
-export async function getState(): Promise<State> {
-  return (await TrackPlayer.getPlaybackState()).state;
+  return (await TrackPlayer.getProgress()) as Progress;
 }
 
 /**
  * Gets the playback state of the player.
  *
- * @see https://rntp.dev/docs/api/constants/state
+ * @see https://doublesymmetry.github.io/react-native-track-player/docs/api/constants/state
  */
 export async function getPlaybackState(): Promise<PlaybackState> {
-  return TrackPlayer.getPlaybackState();
+  return (await TrackPlayer.getPlaybackState()) as PlaybackState;
 }
 
 /**
  * Gets the queue repeat mode.
  *
- * @see https://rntp.dev/docs/api/constants/repeat-mode
+ * @see https://doublesymmetry.github.io/react-native-track-player/docs/api/constants/repeat-mode
  */
 export async function getRepeatMode(): Promise<RepeatMode> {
   return TrackPlayer.getRepeatMode();
@@ -509,4 +430,29 @@ export async function getRepeatMode(): Promise<RepeatMode> {
  */
 export async function retry() {
   return TrackPlayer.retry();
+}
+
+/**
+ * acquires the wake lock of MusicService (android only.)
+ */
+export async function acquireWakeLock() {
+  if (!isAndroid) return;
+  TrackPlayer.acquireWakeLock();
+}
+
+/**
+ * acquires the wake lock of MusicService (android only.)
+ */
+export async function abandonWakeLock() {
+  if (!isAndroid) return;
+  TrackPlayer.abandonWakeLock();
+}
+
+/**
+ * get onStartCommandIntent is null or not (Android only.). this is used to identify
+ * if musicservice is restarted or not.
+ */
+export async function validateOnStartCommandIntent(): Promise<boolean> {
+  if (!isAndroid) return true;
+  return TrackPlayer.validateOnStartCommandIntent();
 }

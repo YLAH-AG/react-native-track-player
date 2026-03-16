@@ -11,7 +11,7 @@ import type { EventPayloadByEventWithType } from '../interfaces';
  */
 export const useTrackPlayerEvents = <
   T extends Event[],
-  H extends (data: EventPayloadByEventWithType[T[number]]) => void
+  H extends (data: EventPayloadByEventWithType[T[number]]) => void,
 >(
   events: T,
   handler: H
@@ -31,7 +31,7 @@ export const useTrackPlayerEvents = <
           'One or more of the events provided to useTrackPlayerEvents is ' +
             `not a valid TrackPlayer event: ${invalidTypes.join("', '")}. ` +
             'A list of available events can be found at ' +
-            'https://rntp.dev/docs/api/events'
+            'https://doublesymmetry.github.io/react-native-track-player/docs/api/events'
         );
       }
     }
