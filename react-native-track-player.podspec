@@ -10,13 +10,16 @@ Pod::Spec.new do |s|
 
   s.author = "David Chavez"
   s.homepage = package["repository"]["url"]
-  s.platform = :ios, "11.0"
+  s.platform = :ios, "13.0"
 
   s.source = { :git => package["repository"]["url"], :tag => "v#{s.version}" }
   s.source_files = "ios/**/*.{h,m,swift}"
 
-  s.swift_version = "4.2"
+  s.swift_version = "5.0"
 
-  s.dependency "React-Core"
   s.dependency "SwiftAudioEx", "1.1.0"
+
+  # Adds React-Core, TurboModule headers, and sets RCT_NEW_ARCH_ENABLED compiler
+  # flags when the consuming app has New Architecture enabled.
+  install_modules_dependencies(s)
 end

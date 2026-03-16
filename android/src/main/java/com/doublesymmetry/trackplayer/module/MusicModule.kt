@@ -29,8 +29,12 @@ import javax.annotation.Nonnull
 /**
  * @author Milen Pivchev @mpivchev
  */
-class MusicModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext),
+class MusicModule(reactContext: ReactApplicationContext) : NativeTrackPlayerModuleSpec(reactContext),
     ServiceConnection {
+
+    companion object {
+        const val NAME = "TrackPlayerModule"
+    }
     private var playerOptions: Bundle? = null
     private var isServiceBound = false
     private var playerSetUpPromise: Promise? = null
@@ -39,9 +43,7 @@ class MusicModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     private val context = reactContext
 
     @Nonnull
-    override fun getName(): String {
-        return "TrackPlayerModule"
-    }
+    override fun getName(): String = NAME
 
     override fun initialize() {
         Timber.plant(Timber.DebugTree())
@@ -627,5 +629,26 @@ class MusicModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaM
     fun getPlaybackState(callback: Promise) = scope.launch {
         if (verifyServiceBoundOrReject(callback)) return@launch
         callback.resolve(Arguments.fromBundle(musicService.getPlayerStateBundle(musicService.state)))
+    }
+
+    // Sleep timer stubs — iOS-only feature, not supported on Android.
+    @ReactMethod
+    override fun getSleepTimerProgress(callback: Promise) {
+        callback.reject("not_supported", "Sleep timer is not supported on Android.")
+    }
+
+    @ReactMethod
+    override fun setSleepTimer(time: Double, callback: Promise) {
+        callback.reject("not_supported", "Sleep timer is not supported on Android.")
+    }
+
+    @ReactMethod
+    override fun sleepWhenActiveTrackReachesEnd(callback: Promise) {
+        callback.reject("not_supported", "Sleep timer is not supported on Android.")
+    }
+
+    @ReactMethod
+    override fun clearSleepTimer(callback: Promise) {
+        callback.reject("not_supported", "Sleep timer is not supported on Android.")
     }
 }

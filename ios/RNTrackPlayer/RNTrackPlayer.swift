@@ -10,8 +10,13 @@ import Foundation
 import MediaPlayer
 import SwiftAudioEx
 
+#if RCT_NEW_ARCH_ENABLED
+@objc(RNTrackPlayer)
+public class RNTrackPlayer: RCTEventEmitter, RNTrackPlayerModuleSpec, AudioSessionControllerDelegate {
+#else
 @objc(RNTrackPlayer)
 public class RNTrackPlayer: RCTEventEmitter, AudioSessionControllerDelegate {
+#endif
 
     // MARK: - Attributes
 

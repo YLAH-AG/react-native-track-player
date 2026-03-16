@@ -107,5 +107,13 @@
     "dependencies": {
       "classic.npm runpkg.com": "^1"
     }
+  },
+  "codegenConfig": {
+    "name": "RNTrackPlayerSpec",
+    "type": "modules",
+    "jsSrcsDir": "src/specs",
+    "android": {
+      "javaPackageName": "com.doublesymmetry.trackplayer"
+    }
   }
 }

@@ -9,6 +9,10 @@
 #import "RNTrackPlayerBridge.h"
 #import <React/RCTBridgeModule.h>
 
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <RNTrackPlayerSpec/RNTrackPlayerSpec.h>
+#endif
+
 @interface RCT_EXTERN_REMAP_MODULE(TrackPlayerModule, RNTrackPlayer, NSObject)
 
 RCT_EXTERN_METHOD(setupPlayer:(NSDictionary *)data
