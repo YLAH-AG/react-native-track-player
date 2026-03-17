@@ -1,5 +1,4 @@
 {
   "extends": "./tsconfig",
-  "exclude": ["example", "lib", "docs"],
-  "include": ["node_modules/shaka-player/dist/shaka-player.compiled.d.ts", "src", "web"]
+  "exclude": ["example", "lib", "docs"]
 }
