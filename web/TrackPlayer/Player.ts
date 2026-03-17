@@ -5,7 +5,8 @@ import { SetupNotCalledError } from './SetupNotCalledError';
 export class Player {
   protected hasInitialized = false;
   protected element?: HTMLMediaElement;
-  protected player?: shaka.Player;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected player?: any;
   protected _current?: Track = undefined;
   protected _playWhenReady = false;
   protected _state: PlaybackState = { state: State.None };
