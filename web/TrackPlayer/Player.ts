@@ -1,4 +1,3 @@
-/// <reference path="../../node_modules/shaka-player/dist/shaka-player.compiled.d.ts" />
 import { State } from '../../src/constants/State';
 import type { PlaybackState, Progress, Track } from '../../src/interfaces';
 import { SetupNotCalledError } from './SetupNotCalledError';
