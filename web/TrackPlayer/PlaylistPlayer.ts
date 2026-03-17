@@ -196,7 +196,7 @@ export class PlaylistPlayer extends Player {
     }
 
     // move the track
-    const fromItem = this.playlist[fromIndex];
+    const fromItem = this.playlist[fromIndex]!;
     this.playlist.splice(fromIndex, 1);
     this.playlist.splice(toIndex, 0, fromItem);
 
